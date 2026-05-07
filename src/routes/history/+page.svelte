@@ -1,12 +1,11 @@
 <script lang="ts">
+	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import { Check, Copy, Download, Trash, X } from '@lucide/svelte';
 	import { records } from '$lib/records.svelte';
 	import { toast } from 'svelte-sonner';
 	import { time } from '$lib/utils';
 	import { get } from 'svelte/store';
-	import { Check, Copy, Download, Trash, X } from '@lucide/svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-	import { onMount } from 'svelte';
 
 	let copyStatus = $state(false);
 	let clearButton = $state(false);
@@ -64,17 +63,10 @@
 			});
 	};
 
-	// onMount(() => {
-	// 	records.update((items) => {
-	// 		for (let i = 0; i < 40; i++) {
-	// 			items.push({
-	// 				data: 'Sample Data' + (i + 1),
-	// 				date: new Date()
-	// 			});
-	// 		}
-	// 		return items;
-	// 	});
-	// });
+	const totalUniqueOrders = $derived.by(() => {
+		let uniqueOrders = new Set($records.map((item) => item.data));
+		return uniqueOrders.size;
+	});
 </script>
 
 <svelte:head>
@@ -82,7 +74,6 @@
 </svelte:head>
 
 <AlertDialog.Root bind:open={clearButton}>
-	<!-- <AlertDialog.Trigger>Open</AlertDialog.Trigger> -->
 	<AlertDialog.Content>
 		<AlertDialog.Header>
 			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
@@ -99,7 +90,7 @@
 	<div class="fixed top-0 mb-4 flex h-16 w-full items-center justify-between border-b border-slate-400 bg-white px-6">
 		<Button variant="ghost" class="mr-auto flex flex-col gap-0 p-0">
 			<h1 class="mr-auto text-sm font-bold xl:text-xl">RECORDS</h1>
-			<p class="w-16 rounded bg-amber-200 text-xxs">No Group</p>
+			<p class="max-w-52 rounded bg-amber-200 px-2 text-xxs">{totalUniqueOrders} unique {totalUniqueOrders <= 1 ? 'order' : 'orders'}</p>
 		</Button>
 		<div class="flex gap-2">
 			<Button

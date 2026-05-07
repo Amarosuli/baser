@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Delete, ScanBarcode, TypeOutline } from '@lucide/svelte';
+	import { Check, Delete, History, ScanBarcode, TypeOutline } from '@lucide/svelte';
 	import { records } from '$lib/records.svelte';
 	import Scanner from '$lib/components/scanner.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -101,11 +101,12 @@
 </Drawer.Root>
 
 <div class="absolute top-10 left-0 flex w-full flex-col items-center justify-center text-xxs">
+	<History class="size-8 text-blue-500" />
 	Recent
 
 	<div class="flex w-1/2 flex-col items-center gap-2 pt-4">
 		{#each $records.slice(0, 5) as record}
-			<div class="flex w-full items-center justify-between border-b border-slate-400 last:border-none">
+			<div class="flex w-full items-center justify-between border-b border-slate-400 font-medium last:border-none">
 				<span class="text-center text-blue-700">{record.data}</span>
 				<span class="text-center text-blue-700">{record.date.toLocaleString()}</span>
 			</div>

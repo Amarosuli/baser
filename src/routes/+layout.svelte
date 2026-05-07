@@ -1,9 +1,9 @@
 <script lang="ts">
+	import '../app.css';
+	import { Database, TextCursorInput, UserLock } from '@lucide/svelte';
 	import { Toaster } from '$lib/components/ui/sonner';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import '../app.css';
-	import { Database, TextCursorInput, UserLock } from '@lucide/svelte';
 
 	let { children } = $props();
 </script>
