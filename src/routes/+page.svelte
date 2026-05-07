@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { ScanBarcode, TypeOutline } from '@lucide/svelte';
+	import { Check, Delete, ScanBarcode, TypeOutline } from '@lucide/svelte';
 	import { records } from '$lib/records.svelte';
 	import Scanner from '$lib/components/scanner.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Drawer from '$lib/components/ui/drawer/index.js';
-	import Input from '$lib/components/ui/input/input.svelte';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
@@ -14,9 +13,26 @@
 	let manual = $state(false);
 	let value = $state('');
 
+	const keys = [
+		['1', '2', '3'],
+		['4', '5', '6'],
+		['7', '8', '9'],
+		['Backspace', '0', 'Enter']
+	];
+
+	let handlePress = (key: string) => {
+		if (key === 'Backspace') {
+			value = value.slice(0, -1);
+		} else if (key === 'Enter') {
+			manualHandler();
+		} else {
+			value += key;
+		}
+	};
+
 	let scanHandler = (e: string) => {
 		records.update((items) => {
-			return [...items, { data: e, date: new Date() }];
+			return [{ data: e, date: new Date() }, ...items];
 		});
 		status = 'success';
 		scanning = false;
@@ -28,7 +44,7 @@
 			return;
 		}
 		records.update((items) => {
-			return [...items, { data: value, date: new Date() }];
+			return [{ data: value, date: new Date() }, ...items];
 		});
 		toast.info(value);
 		status = 'success';
@@ -53,13 +69,49 @@
 			<Drawer.Description>This input aim for MDR or any Jobcard with no barcode appear.</Drawer.Description>
 		</Drawer.Header>
 		<Drawer.Footer>
-			<Input type="text" placeholder="Order Number" bind:value />
+			<div class="flex h-7 items-center text-[25px] font-semibold tracking-wider text-blue-600">{value}</div>
 			<Separator />
-			<Button onclick={manualHandler} size="lg">Save</Button>
-			<Drawer.Close>Cancel</Drawer.Close>
+			<div class="mb-4 flex w-full flex-col gap-3 pr-2">
+				{#each keys as row}
+					<div class="flex gap-3">
+						{#each row as key (key)}
+							<Button
+								variant="secondary"
+								class=" h-32 w-1/3 cursor-pointer text-[32px] font-bold shadow transition-colors ease-in-out hover:bg-slate-300 active:bg-slate-300"
+								onclick={(e) => {
+									e.stopImmediatePropagation();
+									handlePress(key);
+								}}
+							>
+								{#if key === 'Backspace'}
+									<Delete class="size-9 text-red-500" />
+								{:else if key === 'Enter'}
+									<Check class="size-9 text-green-500" />
+								{:else}
+									{key}
+								{/if}</Button
+							>
+						{/each}
+					</div>
+				{/each}
+			</div>
+			<Drawer.Close class="bg-primary py-4 text-primary-foreground">Cancel</Drawer.Close>
 		</Drawer.Footer>
 	</Drawer.Content>
 </Drawer.Root>
+
+<div class="absolute top-10 left-0 flex w-full flex-col items-center justify-center text-xxs">
+	Recent
+
+	<div class="flex w-1/2 flex-col items-center gap-2 pt-4">
+		{#each $records.slice(0, 5) as record}
+			<div class="flex w-full items-center justify-between border-b border-slate-400 last:border-none">
+				<span class="text-center text-blue-700">{record.data}</span>
+				<span class="text-center text-blue-700">{record.date.toLocaleString()}</span>
+			</div>
+		{/each}
+	</div>
+</div>
 
 <Scanner bind:scanning oncaptured={scanHandler} />
 

@@ -130,7 +130,7 @@
 		</div>
 	{/if}
 
-	{#each $records.reverse() as item, index}
+	{#each $records as item, index}
 		<div class="mx-6 flex items-center justify-between border-b py-2">
 			<p class="w-1/2 text-xs xl:text-sm">{item.data}</p>
 			<p class="w-1/2 text-xs font-light xl:text-sm">{time(item.date)}</p>
