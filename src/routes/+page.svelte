@@ -107,7 +107,7 @@
 	<div class="flex w-1/2 flex-col items-center gap-2 pt-4">
 		{#each $records.slice(0, 5) as record}
 			<div class="flex w-full items-center justify-between border-b border-slate-400 font-medium last:border-none">
-				<span class="text-center text-blue-700">{record.data}</span>
+				<span class="text-center text-blue-700 tabular-nums">{record.data}</span>
 				<span class="text-center text-blue-700">{record.date.toLocaleString()}</span>
 			</div>
 		{/each}

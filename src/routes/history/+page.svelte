@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-	import { Check, Copy, Download, Trash, X } from '@lucide/svelte';
+	import { Check, Copy, Download, MessageCircle, Trash, X } from '@lucide/svelte';
 	import { records } from '$lib/records.svelte';
 	import { toast } from 'svelte-sonner';
 	import { time } from '$lib/utils';
@@ -9,6 +9,12 @@
 
 	let copyStatus = $state(false);
 	let clearButton = $state(false);
+
+	let waUrl = `whatsapp://send?text=${encodeURIComponent(
+		get(records)
+			.map((item) => item.data)
+			.join('\n')
+	)}`;
 
 	const remove = (index: number) => {
 		records.update((items) => {
@@ -60,6 +66,9 @@
 			})
 			.catch((err) => {
 				toast.error('Failed to copy: ', err);
+			})
+			.finally(() => {
+				copyStatus = false;
 			});
 	};
 
@@ -110,6 +119,10 @@
 					<Copy class="text-sky-700" />
 				{/if}
 				Copy</Button
+			>
+			<Button size="sm" variant="secondary" disabled={copyStatus} class="cursor-pointer p-3 text-xs font-semibold text-lime-800" onclick={() => window.open(waUrl, '_blank')}>
+				<MessageCircle class="text-lime-700" />
+				WA</Button
 			>
 		</div>
 		<div></div>
