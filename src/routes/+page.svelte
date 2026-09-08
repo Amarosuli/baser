@@ -1,17 +1,20 @@
 <script lang="ts">
-	import { Check, Delete, History, ScanBarcode, TypeOutline } from '@lucide/svelte';
-	import { records } from '$lib/records.svelte';
+	import * as Drawer from '$lib/components/ui/drawer/index.js';
 	import Scanner from '$lib/components/scanner.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import * as Drawer from '$lib/components/ui/drawer/index.js';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-	import { toast } from 'svelte-sonner';
 	import { fade } from 'svelte/transition';
+	import { toast } from 'svelte-sonner';
+	import { records } from '$lib/records.svelte';
+	import { wsConnection } from '$lib/websocket.svelte';
+	import { Check, Delete, History, ScanBarcode, TypeOutline, Settings } from '@lucide/svelte';
 
 	let scanning = $state(false);
 	let status = $state('idle');
 	let manual = $state(false);
 	let value = $state('');
+	let showSettings = $state(false);
+	let ipInput = $state(wsConnection.ip);
 
 	const keys = [
 		['1', '2', '3'],
@@ -34,6 +37,7 @@
 		records.update((items) => {
 			return [{ data: e, date: new Date() }, ...items];
 		});
+		wsConnection.send(e);
 		status = 'success';
 		scanning = false;
 	};
@@ -46,6 +50,7 @@
 		records.update((items) => {
 			return [{ data: value, date: new Date() }, ...items];
 		});
+		wsConnection.send(value);
 		toast.info(value);
 		status = 'success';
 		manual = false;
@@ -56,6 +61,29 @@
 <svelte:head>
 	<title>Scanner</title>
 </svelte:head>
+
+<Drawer.Root bind:open={showSettings}>
+	<Drawer.Content>
+		<Drawer.Header>
+			<Drawer.Title>PC Connection</Drawer.Title>
+			<Drawer.Description>Status: {wsConnection.status}</Drawer.Description>
+		</Drawer.Header>
+		<Drawer.Footer>
+			<div class="mb-4 flex w-full flex-col gap-3 pr-2">
+				<input type="text" bind:value={ipInput} class="w-full rounded-md border border-slate-300 bg-transparent px-3 py-2 text-sm placeholder:text-slate-400 focus:ring-1 focus:ring-slate-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50" placeholder="192.168.1.42" />
+			</div>
+			<Button
+				class="w-full"
+				onclick={() => {
+					wsConnection.connect(ipInput);
+				}}
+			>
+				Connect
+			</Button>
+			<Drawer.Close class="bg-primary py-4 text-primary-foreground">CLose</Drawer.Close>
+		</Drawer.Footer>
+	</Drawer.Content>
+</Drawer.Root>
 
 <Drawer.Root
 	bind:open={manual}
@@ -77,16 +105,16 @@
 						{#each row as key (key)}
 							<Button
 								variant="secondary"
-								class=" h-32 w-1/3 cursor-pointer text-[32px] font-bold shadow transition-colors ease-in-out hover:bg-slate-300 active:bg-slate-300"
+								class="h-24 w-1/3 cursor-pointer text-[32px] font-bold shadow transition-colors ease-in-out hover:bg-slate-300 active:bg-slate-300"
 								onclick={(e) => {
 									e.stopImmediatePropagation();
 									handlePress(key);
 								}}
 							>
 								{#if key === 'Backspace'}
-									<Delete class="size-9 text-red-500" />
+									<Delete class="size-8 text-red-500" />
 								{:else if key === 'Enter'}
-									<Check class="size-9 text-green-500" />
+									<Check class="size-8 text-green-500" />
 								{:else}
 									{key}
 								{/if}</Button
@@ -117,6 +145,10 @@
 <Scanner bind:scanning oncaptured={scanHandler} />
 
 <div class="absolute bottom-40 z-40 flex w-screen flex-col items-center justify-center gap-8" in:fade={{ duration: 200 }}>
+	<div class="flex flex-col items-center gap-1">
+		<Button variant="secondary" class="h-14 w-16 cursor-pointer shadow" onclick={() => (showSettings = true)}><Settings class="size-8" /></Button>
+		<p class="text-xxs">{wsConnection.status === 'connected' ? '🟢' : '🔴'}</p>
+	</div>
 	<div class="flex flex-col items-center gap-1">
 		<Button variant="secondary" class="h-14 w-16 cursor-pointer shadow" onclick={() => (manual = true)}><TypeOutline class="size-8" /></Button>
 		<p class="text-xxs">Type</p>
