@@ -23,6 +23,8 @@
 		['Backspace', '0', 'Enter']
 	];
 
+	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 	let handlePress = (key: string) => {
 		if (key === 'Backspace') {
 			value = value.slice(0, -1);
@@ -33,13 +35,13 @@
 		}
 	};
 
-	let scanHandler = (e: string) => {
+	let scanHandler = async (e: string) => {
 		records.update((items) => {
 			return [{ data: e, date: new Date() }, ...items];
 		});
 		wsConnection.send(e);
 		status = 'success';
-		scanning = false;
+		// scanning = false;
 	};
 
 	let manualHandler = () => {
