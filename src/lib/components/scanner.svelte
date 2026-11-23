@@ -57,7 +57,7 @@
 	async function onScanSuccess(decodeText: string, decodeResult: Html5QrcodeResult) {
 		toast.info(decodeText);
 		oncaptured(JSON.parse(decodeText));
-		await delay(1000);
+		await delay(3000);
 		// stop();
 	}
 
