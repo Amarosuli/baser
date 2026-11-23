@@ -11,6 +11,9 @@
 	}
 
 	let { scanning = $bindable(false), oncaptured }: Props = $props();
+	let locked = false;
+	let lastText = '';
+	const COOLDOWN_MS = 2000;
 	let torchSupported = $state(false);
 	let torchOn = $state(false);
 	let html5Qrcode: Html5Qrcode;
@@ -30,6 +33,7 @@
 	}
 
 	function start() {
+		torchOn = false;
 		isLoading = true;
 		html5Qrcode
 			.start(
@@ -51,13 +55,28 @@
 	function stop() {
 		html5Qrcode.stop().then(() => {
 			scanning = false;
+			torchOn = false;
+			torchSupported = false;
+			locked = false;
+			lastText = '';
 		});
 	}
 
 	async function onScanSuccess(decodeText: string, decodeResult: Html5QrcodeResult) {
-		toast.info(decodeText);
-		oncaptured(JSON.parse(decodeText));
-		await delay(3000);
+		if (locked || decodeText === lastText) return;
+		locked = true;
+		lastText = decodeText;
+
+		try {
+			toast.info(decodeText);
+			oncaptured(JSON.parse(decodeText));
+		} catch (e) {
+			toast.error('invalid');
+		} finally {
+			await delay(COOLDOWN_MS);
+			locked = false;
+		}
+
 		// stop();
 	}
 
@@ -78,6 +97,6 @@
 	<reader id="reader" class="relative flex w-full max-w-[500px] items-center justify-center"></reader>
 	<Button variant="outline" size="icon" onclick={stop} class="fixed bottom-32 rounded-full bg-yellow-100/50"><X class="h-8 w-8 text-yellow-300" /></Button>
 	{#if torchSupported}
-		<Button variant="outline" size="icon" onclick={toggleTorch} class="fixed bottom-40 rounded-full bg-yellow-100/50"><Sun class="h-8 w-8 text-yellow-300" /></Button>
+		<Button variant="outline" size="icon" onclick={toggleTorch} class="fixed bottom-48 rounded-full bg-yellow-100/50"><Sun class="h-8 w-8 text-green-300" /></Button>
 	{/if}
 </div>
